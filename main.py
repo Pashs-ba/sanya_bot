@@ -34,7 +34,7 @@ def register(username, id):
 def ping(message):
     global IS_PING
 
-    if message.from_user.username == 'Pashs_ba':
+    if message.from_user.username == 'Pashs_ba' or message.from_user.username == 'r_comrad':
         IS_PING = True
         bot.send_message(message.chat.id, 'Введи ники неугодных одним сообщением, разделяя их пробелом')
     else:
@@ -57,7 +57,7 @@ def send_message(message):
 @bot.message_handler()
 def main(message):
     global IS_PING
-    if IS_PING and message.from_user.username == 'Pashs_ba':
+    if IS_PING and message.from_user.username == 'Pashs_ba' or message.from_user.username == 'r_comrad':
         send_message(message)
         IS_PING = False
     else:
@@ -67,13 +67,14 @@ def main(message):
                  'Pashs_ba': 370666658}
         if not(message.from_user.username in get_user()):
             register(message.from_user.username, message.chat.id)
+            bot.send_message(message.chat.id, 'Бот Сани для пинга')
         if message.from_user.username in admin:
             bot.send_message(message.chat.id, 'Будущая админка')
             print(message.chat.id, message.from_user.username)
+
         else:
-            bot.send_message(message.chat.id, 'Пшел кодить')
-        for i in admin:
-            bot.send_message(admin[i], '{} послал боту такое сообщение: {}, id {}'.format(message.from_user.username, message.text, message.chat.id))
+            for i in admin:
+                bot.send_message(admin[i], '{} послал боту такое сообщение: {}, id {}'.format(message.from_user.username, message.text, message.chat.id))
 
 
 if __name__ == '__main__':
