@@ -42,7 +42,6 @@ def send_message(message):
     for i in new_slaves:
         if i in register:
             bot.send_message(register[i], 'Гда ты?')
-        else:
 
 
 
