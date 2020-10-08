@@ -44,7 +44,6 @@ def send_message(message):
             bot.send_message(register[i], 'Гда ты?')
 
 
-
 @bot.message_handler()
 def main(message):
     global IS_PING
@@ -53,6 +52,7 @@ def main(message):
         IS_PING = False
     else:
         # 'ivan2832': 1061564807,
+
         admin = {
                  'Pashs_ba': 370666658}
         get_user()
