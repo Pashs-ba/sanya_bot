@@ -9,8 +9,7 @@ bot = telebot.TeleBot(token)
 
 
 @bot.message_handler()
-def handle_start_help(message):
-    # 'ivan2832': 0,
+def main(message):
     admin = {'ivan2832': 1061564807,
              'Pashs_ba': 370666658}
     if message.from_user.username in admin:
