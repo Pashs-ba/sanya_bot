@@ -7,14 +7,10 @@ token = config['MAIN']['token']
 
 bot = telebot.TeleBot(token)
 IS_PING = False
-ping = ['Ня! Саня сказал, что тебя не было на занятиях, ууу, а если я разозлюсь?',
+ans = ['Ня! Саня сказал, что тебя не было на занятиях, ууу, а если я разозлюсь?',
        'Эээ, а кодить? Вы и так вымираете, а ты не ходишь',
        'Эй! Ты чего меня обижаешь? Почему тебя не наблюдалось на занятии?',
        'Здрасте, а чего это мы не кодим? Я ведь знаю, что тебя не было! Я всё знаю!']
-ans = ['Слушай, дай отдохнуть',
-       'Ня, ну вот почему вы все такие злые? Я сижу, отдыхаю от Саниных запросов, а ты меня донимаешь',
-       'Если ты думаешь, что боты не имеют права посидеть в тишине, то ты сильно ошибаешься',
-       'Слушай, я на работе, мне не до болтавни, поговорим тогда, когда ты посмеешь прогулять занятие']
 admin = {'ivan2832': 1061564807,
          'Pashs_ba': 370666658,
          'r_comrad': 239460102}
@@ -44,7 +40,7 @@ def ping(message):
         IS_PING = True
         bot.send_message(message.chat.id, 'Введи ники неугодных одним сообщением, разделяя их пробелом')
     else:
-        bot.send_message(message.chat.id, 'Ня, ну ты чего? Только Саня может просить меня о таком!')
+        bot.send_message(message.chat.id, 'Пшёл кодить')
 
 
 
@@ -53,7 +49,7 @@ def ping(message):
 @bot.message_handler()
 def main(message):
 
-    global IS_PING, admin, ans
+    global IS_PING, admin
     if IS_PING and message.from_user.username in admin:
         send_message(message)
         IS_PING = False
@@ -61,19 +57,19 @@ def main(message):
         if not(message.from_user.username in get_user()):
             if message.from_user.username == 'r_comrad' or message.from_user.username == 'Pashs_ba':
                 register(message.from_user.username, message.chat.id)
-                bot.send_message(message.chat.id, 'Для пинга используется команда /ping')
+                bot.send_message(message.chat.id, 'Для пингакоманда /ping')
             else:
                 register(message.from_user.username, message.chat.id)
                 bot.send_message(message.chat.id, 'Бот Сани для пинга')
         else:
-            bot.send_message(message.chat.id, ans[random.randint(0, len(ans)-1)])
+            bot.send_message('Я жива!')
             for i in admin:
                 bot.send_message(admin[i], '{} послал боту сообщение: {}, id {}'.format(message.from_user.username, message.text, message.chat.id))
 
 
 def send_message(message):
     try:
-        global ping
+        global ans
         slaves = message.text.split()
         new_slaves = []
         for i in slaves:
@@ -81,7 +77,7 @@ def send_message(message):
         register = get_user()
         for i in new_slaves:
             if i in register:
-                bot.send_message(register[i], ping[random.randint(0, len(ping)-1)])
+                bot.send_message(register[i], ans[random.randint(0, len(ans)-1)])
     except:
         pass
 
