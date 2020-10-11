@@ -66,8 +66,12 @@ def main(message):
         admin = {
                  'Pashs_ba': 370666658}
         if not(message.from_user.username in get_user()):
-            register(message.from_user.username, message.chat.id)
-            bot.send_message(message.chat.id, 'Бот Сани для пинга')
+            if message.from_user.username == 'r_comrad' or message.from_user.username == 'Pashs_ba':
+                register(message.from_user.username, message.chat.id)
+                bot.send_message(message.chat.id, 'Для пинга команда /ping')
+            else:
+                register(message.from_user.username, message.chat.id)
+                bot.send_message(message.chat.id, 'Бот Сани для пинга')
         if message.from_user.username in admin:
             bot.send_message(message.chat.id, 'Будущая админка')
             print(message.chat.id, message.from_user.username)
