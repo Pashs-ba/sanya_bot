@@ -4,6 +4,10 @@ from utils import *
 logging.basicConfig(filename='error.log', filemode='a', format='%(asctime)s - %(message)s', level=logging.ERROR)
 logging.basicConfig(filename='info.log', filemode='a', format='%(asctime)s - %(message)s', level=logging.INFO)
 
+ans = ['Слушай, дай отдохнуть',
+       'Ня, ну вот почему вы все такие злые? Я сижу, отдыхаю от Саниных запросов, а ты меня донимаешь',
+       'Если ты думаешь, что боты не имеют права посидеть в тишине, то ты сильно ошибаешься',
+       'Слушай, я на работе, мне не до болтавни, поговорим тогда, когда ты посмеешь прогулять занятие']
 
 
 @bot.message_handler(commands=['ping'])
@@ -18,7 +22,7 @@ def ping(message):
 
 @bot.message_handler()
 def main(message):
-    global IS_PING, admin
+    global IS_PING, admin, ans
     if IS_PING and message.from_user.username in admin:
         send_message(message)
         IS_PING = False
@@ -31,7 +35,7 @@ def main(message):
                 register(message.from_user.username, message.chat.id)
                 bot.send_message(message.chat.id, 'Бот Сани для пинга')
         else:
-            bot.send_message(message.chat.id, 'Я жива!')
+            bot.send_message(message.chat.id, ans[random.randint(0, len(ans)-1)])
             for i in admin:
                 bot.send_message(admin[i],
                                  '{} послал боту сообщение: {}, id {}'.format(message.from_user.username, message.text,
