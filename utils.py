@@ -3,7 +3,6 @@ import random
 import telebot
 import configparser
 
-
 ans = ['Ня! Саня сказал, что тебя не было на занятиях, ууу, а если я разозлюсь?',
        'Эээ, а кодить? Вы и так вымираете, а ты не ходишь',
        'Эй! Ты чего меня обижаешь? Почему тебя не наблюдалось на занятии?',
@@ -11,16 +10,16 @@ ans = ['Ня! Саня сказал, что тебя не было на заня
 admin = {'ivan2832': 1061564807,
          'Pashs_ba': 370666658, }
 
-
 config = configparser.ConfigParser()
 config.read('settings.ini')
 token = config['MAIN']['token']
 bot = telebot.TeleBot(token)
 
 IS_PING = False
+IS_MESSAGE = False
 
 
-def get_user():
+def get_user() -> dict:
     with open('users.txt', 'r') as f:
         r = f.read()
     s = r.split(';')
@@ -37,7 +36,7 @@ def register(username, id):
         f.write('{} {};'.format(username, id))
 
 
-def send_message(message):
+def send_warning(message):
     try:
         global ans
         slaves = message.text.split()
@@ -56,3 +55,9 @@ def send_message(message):
                 bot.send_message(message.chat.id, '{} не нашла в списке зареганных'.format(i))
     except:
         logging.error("Exception occurred", exc_info=True)
+
+
+def send_global_message(message):
+    users = get_user()
+    for i in users:
+        bot.send_message(users[i], 'Сообщение от Сани: '+message.text)
