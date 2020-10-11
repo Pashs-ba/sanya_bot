@@ -17,7 +17,7 @@ admin = {'ivan2832': 1061564807,
 
 def get_user():
     with open('users.txt', 'r') as f:
-        r = f.read()
+        r = f.read(),
     s = r.split(';')
     ret = {}
     for i in s:
@@ -57,12 +57,12 @@ def main(message):
         if not(message.from_user.username in get_user()):
             if message.from_user.username == 'r_comrad' or message.from_user.username == 'Pashs_ba':
                 register(message.from_user.username, message.chat.id)
-                bot.send_message(message.chat.id, 'Для пингакоманда /ping')
+                bot.send_message(message.chat.id, 'Для пинга команда /ping')
             else:
                 register(message.from_user.username, message.chat.id)
                 bot.send_message(message.chat.id, 'Бот Сани для пинга')
         else:
-            bot.send_message('Я жива!')
+            bot.send_message(message.chat.id, 'Я жива!')
             for i in admin:
                 bot.send_message(admin[i], '{} послал боту сообщение: {}, id {}'.format(message.from_user.username, message.text, message.chat.id))
 
