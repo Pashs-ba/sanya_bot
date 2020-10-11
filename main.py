@@ -1,12 +1,16 @@
 import telebot
 import configparser
 import random
+import logging
+
+logging.basicConfig(filename='error.log', filemode='a', format='%(asctime)s - %(message)s')
+
 config = configparser.ConfigParser()
 config.read('settings.ini')
 token = config['MAIN']['token']
-
 bot = telebot.TeleBot(token)
 IS_PING = False
+
 ans = ['Ня! Саня сказал, что тебя не было на занятиях, ууу, а если я разозлюсь?',
        'Эээ, а кодить? Вы и так вымираете, а ты не ходишь',
        'Эй! Ты чего меня обижаешь? Почему тебя не наблюдалось на занятии?',
@@ -62,7 +66,7 @@ def main(message):
                 register(message.from_user.username, message.chat.id)
                 bot.send_message(message.chat.id, 'Бот Сани для пинга')
         else:
-            bot.send_message('Я жива!')
+            bot.send_message(message.chat.id, 'Я жива!')
             for i in admin:
                 bot.send_message(admin[i], '{} послал боту сообщение: {}, id {}'.format(message.from_user.username, message.text, message.chat.id))
 
@@ -79,8 +83,11 @@ def send_message(message):
             if i in register:
                 bot.send_message(register[i], ans[random.randint(0, len(ans)-1)])
     except:
-        pass
+        logging.error("Exception occurred", exc_info=True)
 
 
 if __name__ == '__main__':
+  try:
     bot.polling(none_stop=True)
+  except:
+    logging.error("Exception occurred", exc_info=True)
