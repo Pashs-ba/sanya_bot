@@ -9,13 +9,15 @@ bot = telebot.TeleBot(token)
 IS_PING = False
 ans = ['Ня! Саня сказал, что тебя не было на занятиях, ууу, а если я разозлюсь?',
        'Эээ, а кодить? Вы и так вымираете, а ты не ходишь',
-       'Эй! Ты чего меня обижаешь? Почему тебя не наблюдалось занятии?',
-       'Здрасте, а чего это мы не кодим? Я ведь знаю, что тебя не было! Я всё знаю!',]
-
+       'Эй! Ты чего меня обижаешь? Почему тебя не наблюдалось на занятии?',
+       'Здрасте, а чего это мы не кодим? Я ведь знаю, что тебя не было! Я всё знаю!']
+admin = {'ivan2832': 1061564807,
+         'Pashs_ba': 370666658,
+         'r_comrad': 239460102}
 
 def get_user():
     with open('users.txt', 'r') as f:
-        r = f.read()
+        r = f.read(),
     s = r.split(';')
     ret = {}
     for i in s:
@@ -32,39 +34,26 @@ def register(username, id):
 
 @bot.message_handler(commands=['ping'])
 def ping(message):
-    global IS_PING
+    global IS_PING, admin
 
-    if message.from_user.username == 'Pashs_ba' or message.from_user.username == 'r_comrad':
+    if message.from_user.username in admin:
         IS_PING = True
         bot.send_message(message.chat.id, 'Введи ники неугодных одним сообщением, разделяя их пробелом')
     else:
-        bot.send_message(message.chat.id, 'Пшел кодить')
+        bot.send_message(message.chat.id, 'Пшёл кодить')
 
 
-def send_message(message):
-    global ans
-    slaves = message.text.split()
-    new_slaves = []
-    for i in slaves:
-        new_slaves.append(i[1:])
-    bot.send_message(message.chat.id, 'Приступил к работе')
-    register = get_user()
-    for i in new_slaves:
-        if i in register:
-            bot.send_message(register[i], ans[random.randint(0, len(ans)-1)])
+
 
 
 @bot.message_handler()
 def main(message):
-    global IS_PING
-    if IS_PING and message.from_user.username == 'Pashs_ba' or message.from_user.username == 'r_comrad':
+
+    global IS_PING, admin
+    if IS_PING and message.from_user.username in admin:
         send_message(message)
         IS_PING = False
     else:
-        # 'ivan2832': 1061564807,
-
-        admin = {
-                 'Pashs_ba': 370666658}
         if not(message.from_user.username in get_user()):
             if message.from_user.username == 'r_comrad' or message.from_user.username == 'Pashs_ba':
                 register(message.from_user.username, message.chat.id)
@@ -72,13 +61,25 @@ def main(message):
             else:
                 register(message.from_user.username, message.chat.id)
                 bot.send_message(message.chat.id, 'Бот Сани для пинга')
-        if message.from_user.username in admin:
-            bot.send_message(message.chat.id, 'Будущая админка')
-            print(message.chat.id, message.from_user.username)
-
         else:
+            bot.send_message(message.chat.id, 'Я жива!')
             for i in admin:
-                bot.send_message(admin[i], '{} послал боту такое сообщение: {}, id {}'.format(message.from_user.username, message.text, message.chat.id))
+                bot.send_message(admin[i], '{} послал боту сообщение: {}, id {}'.format(message.from_user.username, message.text, message.chat.id))
+
+
+def send_message(message):
+    try:
+        global ans
+        slaves = message.text.split()
+        new_slaves = []
+        for i in slaves:
+            new_slaves.append(i[1:])
+        register = get_user()
+        for i in new_slaves:
+            if i in register:
+                bot.send_message(register[i], ans[random.randint(0, len(ans)-1)])
+    except:
+        pass
 
 
 if __name__ == '__main__':
