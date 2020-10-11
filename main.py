@@ -30,7 +30,7 @@ def main(message):
         if not (message.from_user.username in get_user()):
             if message.from_user.username == 'r_comrad' or message.from_user.username == 'Pashs_ba':
                 register(message.from_user.username, message.chat.id)
-                bot.send_message(message.chat.id, 'Для пингакоманда /ping')
+                bot.send_message(message.chat.id, 'Для пинга команда /ping')
             else:
                 register(message.from_user.username, message.chat.id)
                 bot.send_message(message.chat.id, 'Бот Сани для пинга')
@@ -40,6 +40,7 @@ def main(message):
                 bot.send_message(admin[i],
                                  '{} послал боту сообщение: {}, id {}'.format(message.from_user.username, message.text,
                                                                               message.chat.id))
+
 
 if __name__ == '__main__':
     try:
