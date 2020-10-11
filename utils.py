@@ -11,6 +11,7 @@ ans = ['Ня! Саня сказал, что тебя не было на заня
 admin = {'ivan2832': 1061564807,
          'Pashs_ba': 370666658, }
 
+
 config = configparser.ConfigParser()
 config.read('settings.ini')
 token = config['MAIN']['token']
@@ -42,11 +43,16 @@ def send_message(message):
         slaves = message.text.split()
         new_slaves = []
         for i in slaves:
-            new_slaves.append(i[1:])
+            if i[1] == '@':
+                new_slaves.append(i[1:])
+            else:
+                new_slaves.append(i)
         register = get_user()
         for i in new_slaves:
             if i in register:
                 logging.info(ans[random.randint(0, len(ans) - 1)])
                 bot.send_message(register[i], ans[random.randint(0, len(ans) - 1)])
+            else:
+                bot.send_message(message.chat.id, '{} не нашла в списке зареганных'.format(i))
     except:
         logging.error("Exception occurred", exc_info=True)
