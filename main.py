@@ -1,4 +1,3 @@
-
 from utils import *
 
 logging.basicConfig(filename='error.log', filemode='a', format='%(asctime)s - %(message)s', level=logging.ERROR)
