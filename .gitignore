@@ -5,3 +5,4 @@ settings.ini
 users.txt
 *.log
 .replit
+data.pickle
