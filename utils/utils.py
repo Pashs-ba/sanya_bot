@@ -43,7 +43,7 @@ def send_warning(message):
         slaves = message.text.split()
         new_slaves = []
         for i in slaves:
-            if i[1] == '@':
+            if i[0] == '@':
                 new_slaves.append(i[1:])
             else:
                 new_slaves.append(i)
