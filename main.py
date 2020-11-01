@@ -1,59 +1,184 @@
-from utils import *
-
-logging.basicConfig(filename='error.log', filemode='a', format='%(asctime)s - %(message)s', level=logging.ERROR)
-logging.basicConfig(filename='info.log', filemode='a', format='%(asctime)s - %(message)s', level=logging.INFO)
-
-proud = ['Слушай, дай отдохнуть',
-         'Ня, ну вот почему вы все такие злые? Я сижу, отдыхаю от Саниных запросов, а ты меня донимаешь',
-         'Если ты думаешь, что боты не имеют права посидеть в тишине, то ты сильно ошибаешься',
-         'Слушай, я на работе, мне не до болтавни, поговорим тогда, когда ты посмеешь прогулять занятие']
+import logging
+import peewee
+import models
+import json
+import utils
 
 
-@bot.message_handler(commands=['ping'])
-def ping(message):
-    global IS_PING, admin
-    if message.from_user.username in admin:
-        IS_PING = True
-        bot.send_warning(message.chat.id, 'Введи ники неугодных одним сообщением, разделяя их пробелом')
+utils.enable_logging()
+bot = utils.create_bot()
+db = peewee.SqliteDatabase('data.db')
+with open("phrases.json", "r") as f:
+    MSG = json.load(f)
+
+
+def createTables():
+    with db:
+        db.create_tables([models.Users])
+
+
+def getCurrentUser(message):
+    return models.Users.get_or_none(
+        models.Users.id == message.from_user.id
+    )
+
+
+def admin_only(func):
+    def wrapper(message):
+        user = getCurrentUser(message)
+        if user is not None and user.is_admin:
+            func(message)
+        else:
+            bot.send_message(message.chat.id, MSG['ADMIN_ONLY'])
+    return wrapper
+
+
+@bot.message_handler(commands=["admin"])
+@admin_only
+def admin(message):
+    bot.send_message(message.chat.id, MSG['ADMIN_GREETING'])
+
+
+def sendToEveryStudent(text):
+    students = models.Users.select().where(models.Users.is_teacher == False)
+    for student in students:
+        bot.send_message(student.chat_id, MSG['PING_RECIEVED'])
+        bot.send_message(student.chat_id, text)
+
+
+@admin_only
+def pingStudentsInput(message):
+    try:
+        text = message.text
+        sendToEveryStudent(text)
+    except Exception:
+        bot.send_message(message.chat.id, MSG['INVALID_INPUT'])
+
+
+@bot.message_handler(commands=["ping"])
+@admin_only
+def pingStudents(message):
+    bot.send_message(message.chat.id, MSG["SEND_PING"])
+    bot.register_next_step_handler(message, pingStudentsInput)
+
+
+@bot.message_handler(commands=['listAdmins'])
+@admin_only
+def listAdmins(message):
+    adminList = models.Users.select().where(models.Users.is_admin)
+    msg = (
+        "Администраторы:\n" +
+        '\n'.join(
+            ' '.join((i.name, i.surname)) +
+            " (" + str(i.id) + ")" for i in adminList)
+    ) if adminList else "Администраторов пока что нет!"
+    bot.send_message(message.chat.id, msg)
+
+
+@admin_only
+def addAdminInput(message):
+    try:
+        uid = int(message.text)
+        user = models.Users.get_or_none(models.Users.id == uid)
+        if user is not None:
+            user.is_admin = True
+            user.save()
+            bot.send_message(message.chat.id, MSG["ADD_ADMIN_SUCCESS"])
+        else:
+            bot.send_message(message.chat.id, MSG["ADD_ADMIN_ERROR"])
+    except Exception:
+        bot.send_message(message.chat.id, MSG['INVALID_INPUT'])
+
+
+@bot.message_handler(commands=['addAdmin'])
+@admin_only
+def addAdmin(message):
+    bot.send_message(message.chat.id, MSG["ADD_ADMIN"])
+    bot.register_next_step_handler(message, addAdminInput)
+
+
+@admin_only
+def delAdminInput(message):
+    try:
+        uid = int(message.text)
+        user = models.Users.get_or_none(models.Users.id == uid)
+        if user is not None:
+            user.is_admin = False
+            user.save()
+            bot.send_message(message.chat.id, MSG["DEL_ADMIN_SUCCESS"])
+        else:
+            bot.send_message(message.chat.id, MSG["DEL_ADMIN_ERROR"])
+    except Exception:
+        bot.send_message(message.chat.id, MSG['INVALID_INPUT'])
+
+
+@bot.message_handler(commands=['delAdmin'])
+@admin_only
+def delAdmin(message):
+    bot.send_message(message.chat.id, MSG["DEL_ADMIN"])
+    bot.register_next_step_handler(message, delAdminInput)
+
+
+def registerUser(message):
+    try:
+        name, surname = message.text.split()
+        models.Users.create(
+            id=message.from_user.id,
+            chat_id=message.chat.id,
+            username=message.from_user.username,
+            name=name, surname=surname
+        )
+        bot.send_message(message.chat.id, MSG['REGISTER_SUCCESS'])
+    except Exception:
+        bot.reply_to(message, MSG['INVALID_INPUT'])
+
+
+def registerYesNoAnswer(message):
+    if message.text.lower() == "y":
+        bot.send_message(message.chat.id, MSG['START_REGISTER'])
+        bot.register_next_step_handler(message, registerUser)
     else:
-        bot.send_warning(message.chat.id, 'Пшёл кодить')
+        bot.send_message(message.chat.id, MSG['GOT_REJECTED'])
 
 
-@bot.message_handler(commands=['global_message'])
-def global_message(message):
-    global IS_MESSAGE, admin
-    if message.from_user.username in admin:
-        IS_MESSAGE = True
-        bot.send_message(message.chat.id, 'Напиши сообщения для всех людей')
+@bot.message_handler(commands=['help', 'start'])
+def help(message):
+    bot.send_message(message.chat.id, MSG['HELP'])
+
+
+@bot.message_handler(commands=['listStudents'])
+@admin_only
+def listStudents(message):
+    users = models.Users.select().where(models.Users.is_teacher == False)
+    msg = "Id: {}\nНик: {}\nИмя: {}\nФамилия: {}\n\n"
+    if not users:
+        bot.send_message(message.chat.id, MSG['NO_STUDENTS'])
+        return
+    bot.send_message(message.chat.id, MSG['STUDENTSLIST'])
+    text = ""
+    for u in users:
+        text += msg.format(u.id, u.username, u.name, u.surname)
+        if len(text) > 3500:
+            bot.send_message(message.chat.id, text)
+            text = ""
+    if text:
+        bot.send_message(message.chat.id, text)
 
 
 @bot.message_handler()
 def main(message):
-    global IS_PING, IS_MESSAGE, admin, proud
-    if IS_PING and message.from_user.username in admin:
-        send_warning(message)
-        IS_PING = False
-    elif IS_MESSAGE and message.from_user.username in admin:
-        send_global_message(message)
-        IS_MESSAGE = False
+    user = getCurrentUser(message)
+    if user is None:
+        msg = bot.send_message(message.chat.id, MSG['NEED_TO_REGISTER'])
+        bot.register_next_step_handler(msg, registerYesNoAnswer)
     else:
-        if not (message.from_user.username in get_user()):
-            if message.from_user.username == 'r_comrad' or message.from_user.username == 'Pashs_ba':
-                register(message.from_user.username, message.chat.id)
-                bot.send_message(message.chat.id, 'Для пинга команда /ping')
-            else:
-                register(message.from_user.username, message.chat.id)
-                bot.send_message(message.chat.id, 'Бот Сани для пинга')
-        else:
-            bot.send_message(message.chat.id, proud[random.randint(0, len(proud) - 1)])
-            for i in admin:
-                bot.send_message(admin[i],
-                                 '{} послал боту сообщение: {}, id {}'.format(message.from_user.username, message.text,
-                                                                              message.chat.id))
+        bot.send_message(message.chat.id, MSG['KNOWN_USER'])
 
 
 if __name__ == '__main__':
     try:
-        bot.polling(none_stop=True)
-    except:
+        createTables()
+        with db:
+            bot.polling(none_stop=True)
+    except Exception:
         logging.error("", exc_info=True)

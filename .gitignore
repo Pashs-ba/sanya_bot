@@ -6,3 +6,6 @@ users.txt
 *.log
 .replit
 data.pickle
+__pycache__/
+*.sqlite3
+.vscode/
