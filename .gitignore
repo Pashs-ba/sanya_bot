@@ -1,7 +1,6 @@
 # Project exclude paths
 /venv/
 /.idea/
-settings.ini
 users.txt
 *.log
 .replit
