@@ -7,5 +7,5 @@ users.txt
 .replit
 data.pickle
 __pycache__/
-*.sqlite3
+data.db
 .vscode/
