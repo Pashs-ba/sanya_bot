@@ -35,6 +35,15 @@ def getCurrentUser(message):
     )
 
 
+def initialize_admins():
+    admins_ids = [401602836]
+    for id in admins_ids:
+        user = models.Users.get_or_none(id=id)
+        if user is not None:
+            user.is_admin = True
+            user.save()
+
+
 def admin_only(func):
     def wrapper(message):
         user = getCurrentUser(message)
@@ -192,6 +201,7 @@ if __name__ == '__main__':
     try:
         with db:
             createTables()
+            initialize_admins()
             bot.polling(none_stop=True)
     except Exception:
         logging.error("", exc_info=True)
