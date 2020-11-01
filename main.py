@@ -63,8 +63,9 @@ def pingStudentsInput(message):
     try:
         text = message.text
         sendToEveryStudent(text)
-    except Exception:
+    except Exception as e:
         bot.send_message(message.chat.id, MSG['INVALID_INPUT'])
+        print(e)
 
 
 @bot.message_handler(commands=["ping"])
