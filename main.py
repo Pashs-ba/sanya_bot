@@ -6,15 +6,16 @@ import utils
 import os
 import telebot
 import configparser
-# from flask import Flask, request
 
 
-config = configparser.ConfigParser()
-config.read("settings.ini")
-TOKEN = config['MAIN']['token']
-APP_NAME = config['HEROKU']['app-name']
+DEBUG = False if os.environ.get("DEBUG", False) else True
+if DEBUG:
+    config = configparser.ConfigParser()
+    config.read("settings.ini")
+    TOKEN = config['MAIN']['token']
+else:
+    TOKEN = os.environ.get("TOKEN")
 bot = telebot.TeleBot(TOKEN)
-# server = Flask(__name__)
 
 
 utils.enable_logging()
@@ -186,25 +187,10 @@ def main(message):
         bot.send_message(message.chat.id, MSG['KNOWN_USER'])
 
 
-# @server.route('/' + TOKEN, methods=['POST'])
-# def getMessage():
-#     with db:
-#         bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-#     return "!", 200
-
-
-# @server.route("/")
-# def webhook():
-#     bot.remove_webhook()
-#     bot.set_webhook(url='https://{}.herokuapp.com/'.format(APP_NAME) + TOKEN)
-#     return "!", 200
-
-
 if __name__ == '__main__':
     try:
         with db:
             createTables()
             bot.polling(none_stop=True)
-        # server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
     except Exception:
         logging.error("", exc_info=True)
