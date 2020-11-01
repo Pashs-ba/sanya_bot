@@ -188,8 +188,8 @@ def main(message):
 
 @server.route('/' + TOKEN, methods=['POST'])
 def getMessage():
-    createTables()
-    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    with db:
+        bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     return "!", 200
 
 
@@ -203,6 +203,7 @@ def webhook():
 if __name__ == '__main__':
     try:
         with db:
-            server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+            createTables()
+        server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
     except Exception:
         logging.error("", exc_info=True)
