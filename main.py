@@ -202,6 +202,7 @@ if __name__ == '__main__':
         with db:
             createTables()
             initialize_admins()
+            print("admins initialized")
             bot.polling(none_stop=True)
     except Exception:
         logging.error("", exc_info=True)
